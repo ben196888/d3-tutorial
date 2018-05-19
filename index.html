@@ -28,6 +28,7 @@ d3.json("data.json", function(json) {
             amount: link.amount,
         };
     });
+
     /* Define the data for the circles */
     const siteElements = svg.selectAll("g sites")
         .data(json.nodes);
@@ -36,6 +37,12 @@ d3.json("data.json", function(json) {
         .data(linksWithSites);
 
     const defaultAmounts = json.nodes.reduce(function (acc, node) {
+        return Object.assign(acc, {
+            [node.id]: 0,
+        });
+    }, {});
+
+    const defaultLinkCounts = json.nodes.reduce(function (acc, node) {
         return Object.assign(acc, {
             [node.id]: 0,
         });
@@ -50,11 +57,16 @@ d3.json("data.json", function(json) {
         });
     }, defaultAmounts);
 
+    const linkCounts = json.links.reduce(function (acc, link) {
+        const node01LinkCount = acc[link.node01];
+        const node02LinkCount = acc[link.node02];
+        return Object.assign(acc, {
+            [link.node01]: node01LinkCount + 1,
+            [link.node02]: node02LinkCount + 1,
+        });
+    }, defaultLinkCounts);
+
     const siteElemsEnter = siteElements.enter();
-        // .append("g")
-        // .attr("transform", function (d) {
-        //     return `translate(${d.x}, ${d.y})`;
-        // });
 
     /*Create the circle for each block */
     const circle = siteElemsEnter.append("circle")
@@ -77,7 +89,7 @@ d3.json("data.json", function(json) {
         })
         .append("svg:title")
             .text(function(d) {
-                return `id: ${d.id}, amount: ${amounts[d.id]}`;
+                return `id: ${d.id}, amount: ${amounts[d.id]}, links: ${linkCounts[d.id]}`;
             });
 
     const linkElemsEnter = linkElements.enter();
