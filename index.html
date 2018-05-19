@@ -47,14 +47,17 @@ d3.json("data.json", function(json) {
         .attr("stroke", "black")
         .attr("fill", "black")
         .on("mouseover", function (d) {
-            svg.selectAll("circle")
-                .attr("opacity", 0.3);
-            d3.select(this)
-                .attr("opacity", 1);
+            elem.attr("opacity", 0.3);
+            d3.select(this).attr("opacity", 1);
+            linkElement.attr("opacity", function (l) {
+                return (l.node01.id === d.id || l.node02.id === d.id)
+                    ? 1
+                    : 0.3;
+            });
         })
         .on("mouseout", function (d) {
-            svg.selectAll("circle")
-                .attr("opacity", 1);
+            elem.attr("opacity", 1);
+            linkElement.attr("opacity", 1);
         })
         .append("svg:title")
             .text(function(d) {
