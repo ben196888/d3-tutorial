@@ -15,37 +15,29 @@ const svg = d3.select("body").append("svg")
 d3.json("data.json", ({ nodes, links }) => {
 
     // Pre-process
-    const linksWithSites = links.map(({ node01, node02, amount }) => {
-        return {
-            node01: nodes.find(({ id }) => id === node01),
-            node02: nodes.find(({ id }) => id === node02),
-            amount: amount,
-        };
-    });
+    const linksWithSites = links.map(({ node01, node02, amount }) => ({
+        node01: nodes.find(({ id }) => id === node01),
+        node02: nodes.find(({ id }) => id === node02),
+        amount,
+    }));
 
-    /* Define the data for the circles */
     const siteElements = svg.selectAll("g sites").data(nodes);
-
     const linkElements = svg.selectAll("g links").data(linksWithSites);
 
     const defaultAmounts = nodes.reduce((acc, { id }) => Object.assign(acc, { [id]: 0 }), {});
-
     const defaultLinkCounts = nodes.reduce((acc, { id }) => Object.assign(acc, { [id]: 0 }), {});
 
     const amounts = links.reduce((acc, { node01, node02, amount }) => Object.assign(acc, {
         [node01]: acc[node01] + amount,
         [node02]: acc[node02] + amount,
     }), defaultAmounts);
-
     const linkCounts = links.reduce((acc, { node01, node02 }) => Object.assign(acc, {
         [node01]: acc[node01] + 1,
         [node02]: acc[node02] + 1,
     }), defaultLinkCounts);
 
     const siteElemsEnter = siteElements.enter();
-
-    /*Create the circle for each block */
-    const circle = siteElemsEnter.append("circle")
+    siteElemsEnter.append("circle")
         .attr("cx", ({ x }) => x)
         .attr("cy", ({ y }) => y)
         .attr("r", ({ id }) => amounts[id] / 100)
