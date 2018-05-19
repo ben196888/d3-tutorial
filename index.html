@@ -46,6 +46,16 @@ d3.json("data.json", function(json) {
         .attr("r", function (d) { return amounts[d.id] / 100; })
         .attr("stroke", "black")
         .attr("fill", "black")
+        .on("mouseover", function (d) {
+            svg.selectAll("circle")
+                .attr("opacity", 0.3);
+            d3.select(this)
+                .attr("opacity", 1);
+        })
+        .on("mouseout", function (d) {
+            svg.selectAll("circle")
+                .attr("opacity", 1);
+        })
         .append("svg:title")
             .text(function(d) {
                 return `id: ${d.id}, amount: ${amounts[d.id]}`;
