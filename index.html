@@ -45,7 +45,11 @@ d3.json("data.json", function(json) {
         .attr("cy", function (d) { return d.y; })
         .attr("r", function (d) { return amounts[d.id] / 100; })
         .attr("stroke", "black")
-        .attr("fill", "black");
+        .attr("fill", "black")
+        .append("svg:title")
+            .text(function(d) {
+                return `id: ${d.id}, amount: ${amounts[d.id]}`;
+            });
 
     /* Create the text for each block */
     elemEnter.append("text")
