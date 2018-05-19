@@ -44,7 +44,7 @@ d3.json("data.json", function(json) {
         .attr("cx", function (d) { return d.x; })
         .attr("cy", function (d) { return d.y; })
         .attr("r", function (d) { return amounts[d.id] / 100; })
-        .attr("stroke","black")
+        .attr("stroke", "black")
         .attr("fill", "black");
 
     /* Create the text for each block */
