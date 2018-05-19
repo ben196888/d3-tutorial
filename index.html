@@ -12,93 +12,62 @@ const svg = d3.select("body").append("svg")
     .attr("height", height)
     .attr("style", "border: 1px solid black");
 
-d3.json("data.json", function(json) {
+d3.json("data.json", ({ nodes, links }) => {
 
     // Pre-process
-    const linksWithSites = json.links.map(function (link) {
-        const l1 = json.nodes.find(function (node) {
-            return node.id === link.node01;
-        });
-        const l2 = json.nodes.find(function (node) {
-            return node.id === link.node02;
-        });
+    const linksWithSites = links.map(({ node01, node02, amount }) => {
         return {
-            node01: l1,
-            node02: l2,
-            amount: link.amount,
+            node01: nodes.find(({ id }) => id === node01),
+            node02: nodes.find(({ id }) => id === node02),
+            amount: amount,
         };
     });
 
     /* Define the data for the circles */
-    const siteElements = svg.selectAll("g sites")
-        .data(json.nodes);
+    const siteElements = svg.selectAll("g sites").data(nodes);
 
-    const linkElements = svg.selectAll("g links")
-        .data(linksWithSites);
+    const linkElements = svg.selectAll("g links").data(linksWithSites);
 
-    const defaultAmounts = json.nodes.reduce(function (acc, node) {
-        return Object.assign(acc, {
-            [node.id]: 0,
-        });
-    }, {});
+    const defaultAmounts = nodes.reduce((acc, { id }) => Object.assign(acc, { [id]: 0 }), {});
 
-    const defaultLinkCounts = json.nodes.reduce(function (acc, node) {
-        return Object.assign(acc, {
-            [node.id]: 0,
-        });
-    }, {});
+    const defaultLinkCounts = nodes.reduce((acc, { id }) => Object.assign(acc, { [id]: 0 }), {});
 
-    const amounts = json.links.reduce(function (acc, link) {
-        const node01Amount = acc[link.node01];
-        const node02Amount = acc[link.node02];
-        return Object.assign(acc, {
-            [link.node01]: node01Amount + link.amount,
-            [link.node02]: node02Amount + link.amount,
-        });
-    }, defaultAmounts);
+    const amounts = links.reduce((acc, { node01, node02, amount }) => Object.assign(acc, {
+        [node01]: acc[node01] + amount,
+        [node02]: acc[node02] + amount,
+    }), defaultAmounts);
 
-    const linkCounts = json.links.reduce(function (acc, link) {
-        const node01LinkCount = acc[link.node01];
-        const node02LinkCount = acc[link.node02];
-        return Object.assign(acc, {
-            [link.node01]: node01LinkCount + 1,
-            [link.node02]: node02LinkCount + 1,
-        });
-    }, defaultLinkCounts);
+    const linkCounts = links.reduce((acc, { node01, node02 }) => Object.assign(acc, {
+        [node01]: acc[node01] + 1,
+        [node02]: acc[node02] + 1,
+    }), defaultLinkCounts);
 
     const siteElemsEnter = siteElements.enter();
 
     /*Create the circle for each block */
     const circle = siteElemsEnter.append("circle")
-        .attr("cx", function (d) { return d.x; })
-        .attr("cy", function (d) { return d.y; })
-        .attr("r", function (d) { return amounts[d.id] / 100; })
+        .attr("cx", ({ x }) => x)
+        .attr("cy", ({ y }) => y)
+        .attr("r", ({ id }) => amounts[id] / 100)
         .attr("stroke", "black")
         .attr("fill", "black")
-        .on("mouseover", function (d) {
-            siteElements.attr("opacity", function (s) {
-                return (s.id === d.id) ? 1 : 0.3;
-            });
-            linkElements.attr("opacity", function (l) {
-                return (l.node01.id === d.id || l.node02.id === d.id) ? 1 : 0.3;
-            });
+        .on("mouseover", ({ id }) => {
+            siteElements.attr("opacity", (s) => (s.id === id) ? 1 : 0.3);
+            linkElements.attr("opacity", ({ node01, node02 }) => (node01.id === id || node02.id === id) ? 1 : 0.3);
         })
-        .on("mouseout", function (d) {
+        .on("mouseout", () => {
             siteElements.attr("opacity", 1);
             linkElements.attr("opacity", 1);
         })
-        .append("svg:title")
-            .text(function(d) {
-                return `id: ${d.id}, amount: ${amounts[d.id]}, links: ${linkCounts[d.id]}`;
-            });
+        .append("svg:title").text(({ id }) => `id: ${id}, amount: ${amounts[id]}, links: ${linkCounts[id]}`);
 
     const linkElemsEnter = linkElements.enter();
     linkElemsEnter.append("line")
-        .attr("x1", function (d) { return d.node01.x; })
-        .attr("y1", function (d) { return d.node01.y; })
-        .attr("x2", function (d) { return d.node02.x; })
-        .attr("y2", function (d) { return d.node02.y; })
-        .attr("stroke-width", function (d) { return d.amount / 100; })
+        .attr("x1", ({ node01: { x } }) => x)
+        .attr("y1", ({ node01: { y } }) => y)
+        .attr("x2", ({ node02: { x } }) => x)
+        .attr("y2", ({ node02: { y } }) => y)
+        .attr("stroke-width", ({ amount }) => amount / 100)
         .attr("stroke", "black");
 })
 </script>
