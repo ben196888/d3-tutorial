@@ -13,9 +13,27 @@ const svg = d3.select("body").append("svg")
     .attr("style", "border: 1px solid black");
 
 d3.json("data.json", function(json) {
+
+    // Pre-process
+    const linksWithSites = json.links.map(function (link) {
+        const l1 = json.nodes.find(function (node) {
+            return node.id === link.node01;
+        });
+        const l2 = json.nodes.find(function (node) {
+            return node.id === link.node02;
+        });
+        return {
+            node01: l1,
+            node02: l2,
+            amount: link.amount,
+        };
+    });
     /* Define the data for the circles */
-    const elem = svg.selectAll("g sites")
+    const siteElements = svg.selectAll("g sites")
         .data(json.nodes);
+
+    const linkElements = svg.selectAll("g links")
+        .data(linksWithSites);
 
     const defaultAmounts = json.nodes.reduce(function (acc, node) {
         return Object.assign(acc, {
@@ -32,56 +50,37 @@ d3.json("data.json", function(json) {
         });
     }, defaultAmounts);
 
-    /*Create and place the "blocks" containing the circle and the text */
-    const elemEnter = elem.enter();
+    const siteElemsEnter = siteElements.enter();
         // .append("g")
         // .attr("transform", function (d) {
         //     return `translate(${d.x}, ${d.y})`;
         // });
 
     /*Create the circle for each block */
-    const circle = elemEnter.append("circle")
+    const circle = siteElemsEnter.append("circle")
         .attr("cx", function (d) { return d.x; })
         .attr("cy", function (d) { return d.y; })
         .attr("r", function (d) { return amounts[d.id] / 100; })
         .attr("stroke", "black")
         .attr("fill", "black")
         .on("mouseover", function (d) {
-            elem.attr("opacity", 0.3);
+            siteElements.attr("opacity", 0.3);
             d3.select(this).attr("opacity", 1);
-            linkElement.attr("opacity", function (l) {
-                return (l.node01.id === d.id || l.node02.id === d.id)
-                    ? 1
-                    : 0.3;
+            linkElements.attr("opacity", function (l) {
+                return (l.node01.id === d.id || l.node02.id === d.id) ? 1 : 0.3;
             });
         })
         .on("mouseout", function (d) {
-            elem.attr("opacity", 1);
-            linkElement.attr("opacity", 1);
+            siteElements.attr("opacity", 1);
+            linkElements.attr("opacity", 1);
         })
         .append("svg:title")
             .text(function(d) {
                 return `id: ${d.id}, amount: ${amounts[d.id]}`;
             });
 
-    const linksWithSites = json.links.map(function (link) {
-        const l1 = json.nodes.find(function (node) {
-            return node.id === link.node01;
-        });
-        const l2 = json.nodes.find(function (node) {
-            return node.id === link.node02;
-        });
-        return {
-            node01: l1,
-            node02: l2,
-            amount: link.amount,
-        };
-    });
-
-    const linkElement = svg.selectAll("g links")
-        .data(linksWithSites);
-    const linkElemEnter = linkElement.enter();
-    linkElemEnter.append("line")
+    const linkElemsEnter = linkElements.enter();
+    linkElemsEnter.append("line")
         .attr("x1", function (d) { return d.node01.x; })
         .attr("y1", function (d) { return d.node01.y; })
         .attr("x2", function (d) { return d.node02.x; })
