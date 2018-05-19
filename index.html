@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+
+const width = 960, height = 500;
+
+const svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("style", "border: 1px solid black");
+
+d3.json("data.json", function(json) {
+    /* Define the data for the circles */
+    const elem = svg.selectAll("g sites")
+        .data(json.nodes);
+
+    /*Create and place the "blocks" containing the circle and the text */
+    const elemEnter = elem.enter();
+        // .append("g")
+        // .attr("transform", function (d) {
+        //     return `translate(${d.x}, ${d.y})`;
+        // });
+
+    /*Create the circle for each block */
+    const circle = elemEnter.append("circle")
+        .attr("cx", function (d) { return d.x; })
+        .attr("cy", function (d) { return d.y; })
+        .attr("r", function (d) { return 3; })
+        .attr("stroke","black")
+        .attr("fill", "black");
+
+    /* Create the text for each block */
+    elemEnter.append("text")
+        .attr("dx", function (d) { return d.x + 6; })
+        .attr("dy", function (d) { return d.y + 4; })
+        .text(function (d) { return d.id; });
+})
+</script>
+
+</body>
