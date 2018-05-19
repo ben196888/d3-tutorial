@@ -37,6 +37,31 @@ d3.json("data.json", function(json) {
         .attr("dx", function (d) { return d.x + 6; })
         .attr("dy", function (d) { return d.y + 4; })
         .text(function (d) { return d.id; });
+
+    const linksWithSites = json.links.map(function (link) {
+        const l1 = json.nodes.find(function (node) {
+            return node.id === link.node01;
+        });
+        const l2 = json.nodes.find(function (node) {
+            return node.id === link.node02;
+        });
+        return {
+            node01: l1,
+            node02: l2,
+            amount: link.amount,
+        };
+    });
+
+    const linkElement = svg.selectAll("g links")
+        .data(linksWithSites);
+    const linkElemEnter = linkElement.enter();
+    linkElemEnter.append("line")
+        .attr("x1", function (d) { return d.node01.x; })
+        .attr("y1", function (d) { return d.node01.y; })
+        .attr("x2", function (d) { return d.node02.x; })
+        .attr("y2", function (d) { return d.node02.y; })
+        .attr("stroke-width", function (d) { return d.amount / 100; })
+        .attr("stroke", "black");
 })
 </script>
 
