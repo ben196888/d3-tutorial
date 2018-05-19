@@ -12,6 +12,8 @@ const svg = d3.select("body").append("svg")
     .attr("height", height)
     .attr("style", "border: 1px solid black");
 
+const color = d3.scale.category20();
+
 d3.json("data.json", ({ nodes, links }) => {
 
     // Pre-process
@@ -36,13 +38,22 @@ d3.json("data.json", ({ nodes, links }) => {
         [node02]: acc[node02] + 1,
     }), defaultLinkCounts);
 
+    const linkElemsEnter = linkElements.enter();
+    linkElemsEnter.append("line")
+        .attr("x1", ({ node01: { x } }) => x)
+        .attr("y1", ({ node01: { y } }) => y)
+        .attr("x2", ({ node02: { x } }) => x)
+        .attr("y2", ({ node02: { y } }) => y)
+        .attr("stroke-width", ({ amount }) => amount / 100)
+        .attr("stroke", "black");
+
     const siteElemsEnter = siteElements.enter();
     siteElemsEnter.append("circle")
         .attr("cx", ({ x }) => x)
         .attr("cy", ({ y }) => y)
         .attr("r", ({ id }) => amounts[id] / 100)
         .attr("stroke", "black")
-        .attr("fill", "black")
+        .attr("fill", (d, i) => color(i))
         .on("mouseover", ({ id }) => {
             siteElements.attr("opacity", (s) => (s.id === id) ? 1 : 0.3);
             linkElements.attr("opacity", ({ node01, node02 }) => (node01.id === id || node02.id === id) ? 1 : 0.3);
@@ -53,14 +64,6 @@ d3.json("data.json", ({ nodes, links }) => {
         })
         .append("svg:title").text(({ id }) => `id: ${id}, amount: ${amounts[id]}, links: ${linkCounts[id]}`);
 
-    const linkElemsEnter = linkElements.enter();
-    linkElemsEnter.append("line")
-        .attr("x1", ({ node01: { x } }) => x)
-        .attr("y1", ({ node01: { y } }) => y)
-        .attr("x2", ({ node02: { x } }) => x)
-        .attr("y2", ({ node02: { y } }) => y)
-        .attr("stroke-width", ({ amount }) => amount / 100)
-        .attr("stroke", "black");
 })
 </script>
 
