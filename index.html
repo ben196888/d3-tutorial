@@ -51,12 +51,6 @@ d3.json("data.json", function(json) {
                 return `id: ${d.id}, amount: ${amounts[d.id]}`;
             });
 
-    /* Create the text for each block */
-    elemEnter.append("text")
-        .attr("dx", function (d) { return d.x + 6; })
-        .attr("dy", function (d) { return d.y + 4; })
-        .text(function (d) { return d.id; });
-
     const linksWithSites = json.links.map(function (link) {
         const l1 = json.nodes.find(function (node) {
             return node.id === link.node01;
