@@ -17,6 +17,21 @@ d3.json("data.json", function(json) {
     const elem = svg.selectAll("g sites")
         .data(json.nodes);
 
+    const defaultAmounts = json.nodes.reduce(function (acc, node) {
+        return Object.assign(acc, {
+            [node.id]: 0,
+        });
+    }, {});
+
+    const amounts = json.links.reduce(function (acc, link) {
+        const node01Amount = acc[link.node01];
+        const node02Amount = acc[link.node02];
+        return Object.assign(acc, {
+            [link.node01]: node01Amount + link.amount,
+            [link.node02]: node02Amount + link.amount,
+        });
+    }, defaultAmounts);
+
     /*Create and place the "blocks" containing the circle and the text */
     const elemEnter = elem.enter();
         // .append("g")
@@ -28,7 +43,7 @@ d3.json("data.json", function(json) {
     const circle = elemEnter.append("circle")
         .attr("cx", function (d) { return d.x; })
         .attr("cy", function (d) { return d.y; })
-        .attr("r", function (d) { return 3; })
+        .attr("r", function (d) { return amounts[d.id] / 100; })
         .attr("stroke","black")
         .attr("fill", "black");
 
