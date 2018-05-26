@@ -45,7 +45,28 @@ d3.json("data.json", ({ nodes, links }) => {
         .attr("x2", ({ node02: { x } }) => x)
         .attr("y2", ({ node02: { y } }) => y)
         .attr("stroke-width", ({ amount }) => amount / 100)
-        .attr("stroke", "black");
+        .attr("stroke", function ({ node01, node02 }) {
+            const line = this;
+            const n = line.getTotalLength(), t = [0], dt = 8;
+            let i = 0
+            while ((i += dt) < n) t.push(i);
+            t.push(n);
+            const points = t.map(function(t) {
+                const p = line.getPointAtLength(t), a = [p.x, p.y];
+                a.t = t / n;
+                return a;
+            });
+            const quads = d3.range(points.length - 1).map(function(i) {
+                const a = [points[i - 1], points[i], points[i + 1], points[i + 2]];
+                a.t = (points[i].t + points[i + 1].t) / 2;
+                return a;
+            });
+
+            console.log('points, quads', points, quads)
+            const idx01 = nodes.findIndex(({ id }) => node01.id === id);
+            const idx02 = nodes.findIndex(({ id }) => node02.id === id);
+            return 'black';
+        });
 
     const siteElemsEnter = siteElements.enter();
     siteElemsEnter.append("circle")
